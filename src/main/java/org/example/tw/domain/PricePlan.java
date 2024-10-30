@@ -1,10 +1,13 @@
 package org.example.tw.domain;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 public class PricePlan {
 
     private final String energySupplier;
@@ -32,7 +35,7 @@ public class PricePlan {
         return unitRate;
     }
 
-    public BigDecimal getPrice(LocalDateTime dateTime) {
+    public BigDecimal getPrice(LocalDateTime dateTime) { 
         return peakTimeMultipliers.stream()
                 .filter(multiplier -> multiplier.dayOfWeek.equals(dateTime.getDayOfWeek()))
                 .findFirst()

@@ -3,6 +3,8 @@ package org.example.tw.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +21,31 @@ public class PricePlanService {
 
     private final List<PricePlan> pricePlans;
     private final MeterReadingService meterReadingService;
+    private final  AccountService accountService;
 
-    public PricePlanService(List<PricePlan> pricePlans, MeterReadingService meterReadingService) {
+    public PricePlanService(List<PricePlan> pricePlans, MeterReadingService meterReadingService, AccountService accountService) {
         this.pricePlans = pricePlans;
         this.meterReadingService = meterReadingService;
+        this.accountService = accountService;
     }
+
+    public PricePlan getPricePlanBySmartMeterId(String smartMeterId) {
+        String pricePlanId = accountService.getPricePlanIdForSmartMeterId(smartMeterId);
+        return pricePlans.stream()
+                .filter(plan -> plan.getPlanName().equals(pricePlanId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No PricePlan found for smart meter ID: " + smartMeterId));
+    }
+
+    // New method to retrieve PricePlan by planName
+    public Optional<PricePlan> getPricePlanByName(String planName) {
+        return pricePlans.stream()
+                .filter(pricePlan -> pricePlan.getPlanName().equalsIgnoreCase(planName))
+                .findFirst();
+    }
+
+    //
+
 
     public Optional<Map<String, BigDecimal>> getConsumptionCostOfElectricityReadingsForEachPricePlan(
             String smartMeterId) {
@@ -64,4 +86,5 @@ public class PricePlanService {
 
         return BigDecimal.valueOf(Duration.between(first.time(), last.time()).getSeconds() / 3600.0);
     }
+
 }
